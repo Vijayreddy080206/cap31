@@ -1,0 +1,29 @@
+services:
+
+  backend:
+    build: ./backend
+    container_name: lab30-backend
+    ports:
+      - "5050:5000"
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://host.docker.internal:27017/myAppDB
+      - PORT=5000
+    networks:
+      - lab30-network
+
+  frontend:
+    build: ./frontend
+    container_name: lab30-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5050/api
+    depends_on:
+      - backend
+    networks:
+      - lab30-network
+
+networks:
+  lab30-network:
+    driver: bridge
