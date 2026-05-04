@@ -1,20 +1,39 @@
 pipeline {
     agent any
 
+    environment {
+        CI = 'false'
+    }
+
     stages {
         stage('Check Node') {
             steps {
-                sh '''
-                    node --version
-                    npm --version
-                '''
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            node --version
+                            npm --version
+                        '''
+                    } else {
+                        bat '''
+                            node --version
+                            npm --version
+                        '''
+                    }
+                }
             }
         }
 
         stage('Install Backend') {
             steps {
                 dir('backend') {
-                    sh 'npm ci'
+                    script {
+                        if (isUnix()) {
+                            sh 'npm ci'
+                        } else {
+                            bat 'npm ci'
+                        }
+                    }
                 }
             }
         }
@@ -22,7 +41,13 @@ pipeline {
         stage('Install Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci'
+                    script {
+                        if (isUnix()) {
+                            sh 'npm ci'
+                        } else {
+                            bat 'npm ci'
+                        }
+                    }
                 }
             }
         }
@@ -30,17 +55,29 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'CI=false npm run build'
+                    script {
+                        if (isUnix()) {
+                            sh 'npm run build'
+                        } else {
+                            bat 'npm run build'
+                        }
+                    }
                 }
             }
         }
 
         stage('Validate Docker Compose') {
             steps {
-                sh '''
-                    export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
-                    docker compose config
-                '''
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+                            docker compose config
+                        '''
+                    } else {
+                        bat 'docker compose config'
+                    }
+                }
             }
         }
     }
